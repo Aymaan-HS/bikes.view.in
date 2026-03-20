@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTO UNIVERSE — The Ultimate Bike Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ─── CSS VARIABLES ─── */
+  :root {
+    --fire: #FF4500;
+    --gold: #FFB800;
+    --ice: #00D4FF;
+    --neon: #39FF14;
+    --dark: #050507;
+    --dark2: #0a0a12;
+    --dark3: #0f0f1a;
+    --surface: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --text: #e8e8f0;
+    --muted: rgba(232,232,240,0.45);
+  }
+
+  /* ─── RESET & BASE ─── */
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ─── CUSTOM CURSOR ─── */
+  #cursor {
+    width: 12px; height: 12px;
+    background: var(--fire);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 10000;
+    transform: translate(-50%,-50%);
+    transition: transform 0.05s, background 0.2s, width 0.2s, height 0.2s;
+    mix-blend-mode: screen;
+  }
+  #cursor-ring {
+    width: 38px; height: 38px;
+    border: 1.5px solid rgba(255,69,0,0.6);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: transform 0.12s ease, border-color 0.2s, width 0.2s, height 0.2s;
+  }
+  body:hover #cursor { width: 14px; height: 14px; }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.022;
+    pointer-events: none; z-index: 9998;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--fire); border-radius: 2px; }
+
+  /* ─── PROGRESS BAR ─── */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--fire), var(--gold));
+    z-index: 9997; width: 0%; transition: width 0.1s linear;
+    box-shadow: 0 0 10px var(--fire);
+  }
+
+  /* ─────────────────────────────────────────
+     HERO SECTION
+  ───────────────────────────────────────── */
+  #hero {
+    position: relative; height: 100vh; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+  }
+
+  .hero-bg-layer {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 60%, rgba(255,69,0,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,212,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 20%, rgba(255,184,0,0.07) 0%, transparent 60%),
+      linear-gradient(170deg, #050507 0%, #0a0510 40%, #050507 100%);
+    will-change: transform;
+  }
+
+  /* Speed lines */
+  .speed-lines {
+    position: absolute; inset: 0; overflow: hidden;
+    opacity: 0.07;
+  }
+  .speed-lines::before, .speed-lines::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: -100%;
+    width: 300%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--fire), transparent);
+    animation: speedLine 3s linear infinite;
+  }
+  .speed-lines::after {
+    top: 40%; animation-delay: 1.5s;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  @keyframes speedLine {
+    0% { transform: translateX(-30%) translateY(var(--offset, 0)); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateX(60%) translateY(var(--offset, 0)); opacity: 0; }
+  }
+
+  /* Grid overlay */
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,69,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,69,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform: perspective(600px) rotateX(30deg) scale(2.2) translateY(20%);
+    transform-origin: bottom center;
+    will-change: transform;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--fire);
+    border-radius: 50%;
+    animation: floatUp linear infinite;
+    opacity: 0;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-100vh) translateX(var(--drift, 20px)); opacity: 0; }
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .hero-eyebrow {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem; letter-spacing: 0.5em;
+    color: var(--fire); text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 18vw, 18rem);
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 40%, var(--fire) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeUp 0.8s 0.15s ease both;
+    text-shadow: none;
+    filter: drop-shadow(0 0 80px rgba(255,69,0,0.3));
+    will-change: transform;
+  }
+
+  .hero-sub {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.65rem, 1.5vw, 1rem);
+    letter-spacing: 0.35em;
+    color: var(--muted);
+    margin-top: 1.5rem;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .hero-scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    opacity: 0.5;
+    animation: fadeUp 1s 1s ease both;
+  }
+  .hero-scroll-hint span {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem; letter-spacing: 0.4em;
+    color: var(--fire);
+  }
+  .scroll-arrow {
+    width: 20px; height: 28px;
+    border: 1.5px solid var(--fire);
+    border-radius: 10px;
+    position: relative;
+  }
+  .scroll-arrow::after {
+    content: '';
+    position: absolute;
+    top: 5px; left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    background: var(--fire);
+    border-radius: 50%;
+    animation: scrollBounce 1.5s ease-in-out infinite;
+  }
+  @keyframes scrollBounce {
+    0%,100% { top: 5px; opacity: 1; }
+    80% { top: 14px; opacity: 0; }
+  }
+
+  /* Hero stats strip */
+  .hero-stats {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 0;
+    border-top: 1px solid var(--border);
+    background: rgba(5,5,7,0.8);
+    backdrop-filter: blur(20px);
+    z-index: 3;
+    animation: fadeUp 0.8s 0.5s ease both;
+  }
+  .hero-stat {
+    padding: 1.2rem 3rem;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .hero-stat:last-child { border-right: none; }
+  .hero-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; color: var(--fire);
+    display: block; line-height: 1;
+  }
+  .hero-stat-label {
+    font-size: 0.65rem; letter-spacing: 0.25em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─────────────────────────────────────────
+     NAV
+  ───────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 9000;
+    padding: 1.2rem 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background 0.3s, backdrop-filter 0.3s, padding 0.3s;
+  }
+  nav.scrolled {
+    background: rgba(5,5,7,0.9);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 3rem;
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.08em;
+    color: #fff;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--fire); }
+
+  .nav-links {
+    display: flex; gap: 2.5rem; list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem; letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--fire); }
+
+  /* ─────────────────────────────────────────
+     FILTER BAR
+  ───────────────────────────────────────── */
+  .filter-section {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(5,5,7,0.95);
+    backdrop-filter: blur(30px);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-section::-webkit-scrollbar { display: none; }
+
+  .filter-inner {
+    display: flex; align-items: stretch;
+    min-width: max-content;
+    margin: 0 auto;
+  }
+
+  .filter-btn {
+    position: relative;
+    padding: 1.1rem 2rem;
+    background: none; border: none; border-right: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem; letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: none;
+    transition: color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+  .filter-btn::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: var(--fire);
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+  }
+  .filter-btn:hover { color: #fff; background: rgba(255,255,255,0.03); }
+  .filter-btn.active { color: var(--fire); }
+  .filter-btn.active::after { transform: scaleX(1); }
+
+  /* ─────────────────────────────────────────
+     BRAND SECTIONS (PARALLAX)
+  ───────────────────────────────────────── */
+  .brand-section {
+    position: relative; overflow: hidden;
+    padding: 8rem 0 6rem;
+    transform: translateZ(0);
+  }
+
+  /* Parallax background per brand */
+  .brand-bg {
+    position: absolute; inset: -30%;
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  /* Brand-specific bg colors */
+  .brand-kawasaki .brand-bg { background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(0,200,80,0.1) 0%, transparent 70%); }
+  .brand-bmw .brand-bg { background: radial-gradient(ellipse 60% 50% at 30% 50%, rgba(0,100,255,0.1) 0%, transparent 70%); }
+  .brand-ktm .brand-bg { background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(255,69,0,0.12) 0%, transparent 70%); }
+  .brand-suzuki .brand-bg { background: radial-gradient(ellipse 60% 50% at 30% 50%, rgba(0,212,255,0.1) 0%, transparent 70%); }
+  .brand-aprilia .brand-bg { background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(200,0,50,0.12) 0%, transparent 70%); }
+  .brand-re .brand-bg { background: radial-gradient(ellipse 60% 50% at 30% 50%, rgba(255,160,0,0.1) 0%, transparent 70%); }
+  .brand-harley .brand-bg { background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(255,184,0,0.1) 0%, transparent 70%); }
+  .brand-ducati .brand-bg { background: radial-gradient(ellipse 60% 50% at 30% 50%, rgba(220,0,0,0.12) 0%, transparent 70%); }
+  .brand-yamaha .brand-bg { background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(0,80,200,0.1) 0%, transparent 70%); }
+  .brand-honda .brand-bg { background: radial-gradient(ellipse 60% 50% at 30% 50%, rgba(255,30,30,0.1) 0%, transparent 70%); }
+
+  /* Divider line */
+  .brand-section + .brand-section::before {
+    content: '';
+    position: absolute; top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  }
+
+  .brand-header {
+    position: relative; z-index: 2;
+    padding: 0 6vw; margin-bottom: 4rem;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: 1.5rem;
+  }
+
+  .brand-name-wrap { line-height: 1; }
+
+  .brand-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem; letter-spacing: 0.4em;
+    color: var(--muted); display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .brand-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 9rem);
+    line-height: 0.9;
+    will-change: transform;
+    display: block;
+  }
+
+  /* Brand-specific name colors */
+  .brand-kawasaki .brand-name { color: #00C850; }
+  .brand-bmw .brand-name { color: #4493F8; }
+  .brand-ktm .brand-name { color: #FF5500; }
+  .brand-suzuki .brand-name { color: #00D4FF; }
+  .brand-aprilia .brand-name { color: #E8002A; }
+  .brand-re .brand-name { color: #E8A000; }
+  .brand-harley .brand-name { color: #FFB800; }
+  .brand-ducati .brand-name { color: #E00000; }
+  .brand-yamaha .brand-name { color: #2060E0; }
+  .brand-honda .brand-name { color: #E81020; }
+
+  .brand-tagline {
+    max-width: 300px;
+    font-size: 0.9rem; font-weight: 300;
+    color: var(--muted); line-height: 1.6;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─────────────────────────────────────────
+     BIKE CARDS GRID
+  ───────────────────────────────────────── */
+  .bikes-grid {
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5px;
+    padding: 0;
+  }
+
+  /* First card in section is wide */
+  .bikes-grid .bike-card:first-child {
+    grid-column: span 2;
+  }
+
+  .bike-card {
+    position: relative; overflow: hidden;
+    background: var(--dark2);
+    cursor: none;
+    transition: z-index 0s;
+  }
+  .bike-card:hover { z-index: 10; }
+
+  /* Bike visual area */
+  .bike-visual {
+    position: relative;
+    height: 260px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--dark3) 0%, var(--dark2) 100%);
+  }
+  .bike-card:first-child .bike-visual { height: 360px; }
+
+  /* SVG bike silhouette */
+  .bike-svg {
+    position: relative; z-index: 2;
+    width: 80%; max-width: 400px;
+    filter: drop-shadow(0 10px 40px rgba(0,0,0,0.8));
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+  .bike-card:hover .bike-svg {
+    transform: scale(1.06) translateY(-8px);
+  }
+  .bike-card:first-child .bike-svg { max-width: 560px; }
+
+  /* Glow under bike */
+  .bike-glow {
+    position: absolute; bottom: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 70%; height: 30px;
+    background: var(--glow-color, rgba(255,69,0,0.4));
+    border-radius: 50%; filter: blur(20px);
+    transition: opacity 0.3s, width 0.3s;
+  }
+  .bike-card:hover .bike-glow { width: 85%; opacity: 0.8; }
+
+  /* Ground line */
+  .bike-ground {
+    position: absolute; bottom: 20px; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glow-color, rgba(255,69,0,0.3)) 50%, transparent);
+  }
+
+  /* Background brand watermark */
+  .bike-watermark {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 9rem;
+    color: rgba(255,255,255,0.02);
+    pointer-events: none;
+    letter-spacing: -0.05em;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Overlay on hover */
+  .bike-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, var(--dark) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    z-index: 1;
+  }
+  .bike-card:hover .bike-overlay { opacity: 0.5; }
+
+  /* Specs reveal on hover */
+  .bike-specs-hover {
+    position: absolute; inset: 0; z-index: 3;
+    display: flex; align-items: flex-end;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .bike-card:hover .bike-specs-hover { opacity: 1; }
+  .specs-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .spec-chip {
+    padding: 0.25rem 0.7rem;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--glow-color, rgba(255,69,0,0.4));
+    border-radius: 2px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem; letter-spacing: 0.2em;
+    color: var(--text);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Card info area */
+  .bike-info {
+    padding: 1.5rem 1.8rem 1.8rem;
+    position: relative;
+    border-top: 1px solid var(--border);
+    transition: background 0.3s;
+  }
+  .bike-card:hover .bike-info {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .bike-category {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem; letter-spacing: 0.35em;
+    color: var(--accent-color, var(--fire));
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .bike-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.9rem; line-height: 1;
+    color: #fff;
+    margin-bottom: 0.6rem;
+    transition: letter-spacing 0.3s;
+  }
+  .bike-card:hover .bike-name { letter-spacing: 0.04em; }
+
+  .bike-stats {
+    display: flex; gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .bike-stat { display: flex; flex-direction: column; }
+  .bike-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem; color: var(--accent-color, var(--fire));
+    line-height: 1;
+  }
+  .bike-stat-key {
+    font-size: 0.6rem; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  .bike-desc {
+    font-size: 0.82rem; font-weight: 300;
+    color: var(--muted); line-height: 1.6;
+    letter-spacing: 0.03em;
+  }
+
+  .bike-cta {
+    position: absolute; right: 1.8rem; bottom: 1.8rem;
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .bike-card:hover .bike-cta {
+    background: var(--accent-color, var(--fire));
+    border-color: var(--accent-color, var(--fire));
+  }
+  .bike-cta svg { fill: none; stroke: #fff; stroke-width: 2; transition: transform 0.2s; }
+  .bike-card:hover .bike-cta svg { transform: translate(2px, -2px); }
+
+  /* ─────────────────────────────────────────
+     PARALLAX QUOTE STRIP
+  ───────────────────────────────────────── */
+  .quote-strip {
+    position: relative; overflow: hidden;
+    padding: 5rem 0;
+    background: var(--dark3);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quote-inner {
+    display: flex; gap: 6rem;
+    white-space: nowrap;
+    animation: marquee 25s linear infinite;
+  }
+
+  .quote-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 7vw, 6rem);
+    color: rgba(255,255,255,0.06);
+    flex-shrink: 0;
+    letter-spacing: 0.08em;
+  }
+  .quote-item span { color: var(--fire); }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ─────────────────────────────────────────
+     COMPARISON TABLE
+  ───────────────────────────────────────── */
+  .comparison-section {
+    padding: 8rem 6vw;
+    position: relative;
+  }
+
+  .section-header {
+    margin-bottom: 4rem;
+  }
+  .section-eyebrow {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem; letter-spacing: 0.5em;
+    color: var(--fire); text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.9;
+    color: #fff;
+  }
+  .section-title span { color: var(--fire); }
+
+  .comp-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .comp-table th {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.58rem; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .comp-table td {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: background 0.2s;
+  }
+  .comp-table tr:hover td { background: rgba(255,255,255,0.025); }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table td:first-child { color: var(--fire); font-weight: 700; }
+
+  .power-bar {
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .power-bar-track {
+    flex: 1; height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px; overflow: hidden;
+  }
+  .power-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--fire), var(--gold));
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.2s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .power-bar-fill.animate { transform: scaleX(1); }
+  .power-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--gold); min-width: 60px; }
+
+  /* ─────────────────────────────────────────
+     FOOTER
+  ───────────────────────────────────────── */
+  footer {
+    position: relative; overflow: hidden;
+    padding: 6rem 6vw 3rem;
+    border-top: 1px solid var(--border);
+    background: var(--dark3);
+  }
+
+  .footer-giant {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 16vw, 15rem);
+    color: rgba(255,255,255,0.03);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    pointer-events: none;
+    user-select: none;
+    margin-bottom: -2rem;
+  }
+
+  .footer-content {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 2rem;
+    position: relative; z-index: 2;
+    margin-bottom: 3rem;
+  }
+
+  .footer-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; color: #fff;
+    letter-spacing: 0.1em;
+  }
+  .footer-brand span { color: var(--fire); }
+
+  .footer-tagline {
+    font-size: 0.82rem; color: var(--muted);
+    font-weight: 300; letter-spacing: 0.1em;
+    margin-top: 0.3rem;
+  }
+
+  .footer-links {
+    display: flex; gap: 3rem; list-style: none;
+  }
+  .footer-links a {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.58rem; letter-spacing: 0.3em;
+    color: var(--muted); text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--fire); }
+
+  .footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+    position: relative; z-index: 2;
+  }
+  .footer-copy {
+    font-size: 0.7rem; color: rgba(255,255,255,0.2);
+    letter-spacing: 0.15em;
+  }
+
+  /* ─────────────────────────────────────────
+     REVEAL ANIMATIONS
+  ───────────────────────────────────────── */
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ─────────────────────────────────────────
+     RESPONSIVE
+  ───────────────────────────────────────── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    nav.scrolled { padding: 0.8rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero-stat { padding: 1rem 1.5rem; }
+    .brand-header { padding: 0 1.5rem; }
+    .bikes-grid .bike-card:first-child { grid-column: span 1; }
+    .comp-table { font-size: 0.75rem; }
+    .comp-table th, .comp-table td { padding: 0.8rem 1rem; }
+    .comparison-section { padding: 5rem 1.5rem; }
+  }
+
+  /* ─── HIDDEN FILTER ─── */
+  .brand-section { display: block; }
+  .brand-section.filtered { display: none; }
+
+  /* ─── TYPE BADGE ─── */
+  .type-badge {
+    position: absolute; top: 1rem; left: 1rem; z-index: 4;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.5rem; letter-spacing: 0.3em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 2px;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+  }
+
+  /* ─── LOADING SCREEN ─── */
+  #loader {
+    position: fixed; inset: 0;
+    background: var(--dark);
+    z-index: 99999;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem;
+    transition: opacity 0.6s, visibility 0.6s;
+  }
+  #loader.done { opacity: 0; visibility: hidden; }
+  .loader-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem; color: #fff;
+    letter-spacing: 0.2em;
+  }
+  .loader-logo span { color: var(--fire); }
+  .loader-bar {
+    width: 200px; height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px; overflow: hidden;
+  }
+  .loader-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--fire), var(--gold));
+    width: 0%;
+    border-radius: 2px;
+    animation: load 1.8s ease forwards;
+  }
+  @keyframes load {
+    0% { width: 0%; }
+    60% { width: 80%; }
+    100% { width: 100%; }
+  }
+  .loader-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem; letter-spacing: 0.5em;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOADER ── -->
+<div id="loader">
+  <div class="loader-logo">MOTO<span>.</span></div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loader-text">INITIALIZING ENGINE</div>
+</div>
+
+<!-- ── CURSOR ── -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="progress"></div>
+
+<!-- ════════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════════ -->
+<nav id="nav">
+  <a href="#" class="nav-logo">MOTO<span>.</span>UNIVERSE</a>
+  <ul class="nav-links">
+    <li><a href="#kawasaki">Kawasaki</a></li>
+    <li><a href="#bmw">BMW</a></li>
+    <li><a href="#ktm">KTM</a></li>
+    <li><a href="#suzuki">Suzuki</a></li>
+    <li><a href="#harley">Harley</a></li>
+    <li><a href="#ducati">Ducati</a></li>
+  </ul>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg-layer" id="heroBg"></div>
+  <div class="hero-grid" id="heroGrid"></div>
+  <div class="speed-lines"></div>
+  <div id="particles"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">The Ultimate Motorsport Gallery</div>
+    <h1 class="hero-title" id="heroTitle">MOTO<br>UNIVERSE</h1>
+    <p class="hero-sub">70+ LEGENDARY MACHINES · 10 ICONIC BRANDS</p>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-num" data-count="300">0</span>
+      <span class="hero-stat-label">Max HP (Kawasaki H2R)</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" data-count="10">0</span>
+      <span class="hero-stat-label">Iconic Brands</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" data-count="400">0</span>
+      <span class="hero-stat-label">KMH (Hayabusa Top Speed)</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" data-count="70">0</span>
+      <span class="hero-stat-label">Bikes Showcased</span>
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <div class="scroll-arrow"></div>
+    <span>Scroll to Explore</span>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     FILTER BAR
+════════════════════════════════════════════ -->
+<div class="filter-section" id="filterBar">
+  <div class="filter-inner">
+    <button class="filter-btn active" data-filter="all">All Brands</button>
+    <button class="filter-btn" data-filter="kawasaki">Kawasaki</button>
+    <button class="filter-btn" data-filter="bmw">BMW</button>
+    <button class="filter-btn" data-filter="ktm">KTM</button>
+    <button class="filter-btn" data-filter="suzuki">Suzuki</button>
+    <button class="filter-btn" data-filter="aprilia">Aprilia</button>
+    <button class="filter-btn" data-filter="re">Royal Enfield</button>
+    <button class="filter-btn" data-filter="harley">Harley-Davidson</button>
+    <button class="filter-btn" data-filter="ducati">Ducati</button>
+    <button class="filter-btn" data-filter="yamaha">Yamaha</button>
+    <button class="filter-btn" data-filter="honda">Honda</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     BRAND SECTIONS
+════════════════════════════════════════════ -->
+
+<!-- ── KAWASAKI ── -->
+<section class="brand-section brand-kawasaki" data-brand="kawasaki" id="kawasaki">
+  <div class="brand-bg" data-parallax="0.3"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">01 / 10</span>
+      <span class="brand-name" data-parallax-text="0.15">KAWASAKI</span>
+    </div>
+    <p class="brand-tagline">Let the Good Times Roll — Pure adrenaline, Japanese precision, legendary green.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #00C850; --glow-color: rgba(0,200,80,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #00C850; --glow-color: rgba(0,200,80,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">H2R</div>
+        <div class="type-badge">Hypersport</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="kgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C850"/><stop offset="100%" stop-color="#005520"/></linearGradient></defs>
+          <!-- Body -->
+          <ellipse cx="250" cy="155" rx="140" ry="18" fill="rgba(0,200,80,0.15)" filter="blur(8px)"/>
+          <!-- Rear wheel -->
+          <circle cx="130" cy="160" r="48" fill="none" stroke="#1a1a1a" stroke-width="14"/>
+          <circle cx="130" cy="160" r="48" fill="none" stroke="#00C850" stroke-width="2" stroke-dasharray="12 8"/>
+          <circle cx="130" cy="160" r="22" fill="#111" stroke="#00C850" stroke-width="1.5"/>
+          <circle cx="130" cy="160" r="6" fill="#00C850"/>
+          <!-- Front wheel -->
+          <circle cx="370" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="14"/>
+          <circle cx="370" cy="160" r="44" fill="none" stroke="#00C850" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="370" cy="160" r="18" fill="#111" stroke="#00C850" stroke-width="1.5"/>
+          <circle cx="370" cy="160" r="5" fill="#00C850"/>
+          <!-- Swingarm -->
+          <line x1="178" y1="155" x2="130" y2="160" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+          <!-- Main fairing body -->
+          <path d="M 175 155 L 200 100 L 260 70 L 340 80 L 380 115 L 380 155 Z" fill="url(#kgr)" stroke="#00C850" stroke-width="1"/>
+          <!-- Cockpit -->
+          <path d="M 260 70 L 310 60 L 350 75 L 340 80 L 290 75 Z" fill="#222"/>
+          <!-- Windscreen -->
+          <path d="M 295 65 L 345 70 L 340 78 L 295 73 Z" fill="rgba(0,200,80,0.3)" stroke="rgba(0,200,80,0.5)" stroke-width="0.5"/>
+          <!-- Exhaust -->
+          <path d="M 175 145 L 145 145 L 135 155" fill="none" stroke="#555" stroke-width="6" stroke-linecap="round"/>
+          <!-- Fork -->
+          <line x1="345" y1="95" x2="368" y2="160" stroke="#333" stroke-width="7" stroke-linecap="round"/>
+          <line x1="355" y1="98" x2="374" y2="160" stroke="#222" stroke-width="5" stroke-linecap="round"/>
+          <!-- Headlight -->
+          <ellipse cx="370" cy="108" rx="15" ry="10" fill="#111" stroke="#00C850" stroke-width="1"/>
+          <ellipse cx="370" cy="108" rx="8" ry="5" fill="rgba(0,200,80,0.6)"/>
+          <!-- Supercharger wing detail -->
+          <path d="M 220 120 L 240 105 L 260 120 L 240 130 Z" fill="rgba(0,200,80,0.4)" stroke="#00C850" stroke-width="0.5"/>
+        </svg>
+        <div class="bike-glow" style="--glow-color: rgba(0,200,80,0.5);"></div>
+        <div class="bike-ground" style="--glow-color: rgba(0,200,80,0.4);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover">
+          <div class="specs-chips">
+            <span class="spec-chip">SUPERCHARGED</span>
+            <span class="spec-chip">998cc 4-CYL</span>
+            <span class="spec-chip">0-100 IN 2.5s</span>
+          </div>
+        </div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#00C850;">Hypersport · Kawasaki</div>
+        <div class="bike-name">Ninja H2R</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00C850;">300</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00C850;">1000cc</span><span class="bike-stat-key">Engine</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00C850;">400+</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">The world's most powerful production motorcycle. Supercharged inline-four with winglets, track-only dominance.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #00C850; --glow-color: rgba(0,200,80,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">ZX10R</div>
+        <div class="type-badge">Superbike</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="130" cy="160" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="130" cy="160" r="46" fill="none" stroke="#00C850" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="130" cy="160" r="18" fill="#111" stroke="#00C850" stroke-width="1"/>
+          <circle cx="130" cy="160" r="5" fill="#00C850"/>
+          <circle cx="370" cy="160" r="42" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="370" cy="160" r="42" fill="none" stroke="#00C850" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="370" cy="160" r="16" fill="#111" stroke="#00C850" stroke-width="1"/>
+          <circle cx="370" cy="160" r="4" fill="#00C850"/>
+          <path d="M 175 155 L 195 105 L 255 78 L 330 85 L 372 118 L 372 155 Z" fill="#00401a" stroke="#00C850" stroke-width="1"/>
+          <path d="M 255 78 L 305 68 L 345 82 L 330 85 Z" fill="#111"/>
+          <path d="M 300 72 L 340 78 L 330 85 L 295 79 Z" fill="rgba(0,200,80,0.25)"/>
+          <line x1="175" y1="155" x2="130" y2="160" stroke="#333" stroke-width="6"/>
+          <line x1="340" y1="100" x2="368" y2="160" stroke="#333" stroke-width="6"/>
+          <ellipse cx="368" cy="112" rx="12" ry="8" fill="#111" stroke="#00C850" stroke-width="1"/>
+          <ellipse cx="368" cy="112" rx="6" ry="4" fill="rgba(0,200,80,0.5)"/>
+          <path d="M 173 145 L 140 148 L 132 158" fill="none" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow"></div>
+        <div class="bike-ground"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">999cc INLINE-4</span><span class="spec-chip">204 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#00C850;">Superbike · Kawasaki</div>
+        <div class="bike-name">Ninja ZX-10R</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00C850;">204</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00C850;">299</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">WSBK legend. Corner-carving precision meets track-bred electronics and an addictive screaming engine note.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-2" style="--accent-color: #00C850; --glow-color: rgba(0,200,80,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">Z900</div>
+        <div class="type-badge">Naked</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#00C850" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="125" cy="160" r="18" fill="#111" stroke="#00C850" stroke-width="1"/>
+          <circle cx="125" cy="160" r="5" fill="#00C850"/>
+          <circle cx="365" cy="160" r="42" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="365" cy="160" r="42" fill="none" stroke="#00C850" stroke-width="1.5" stroke-dasharray="8 7"/>
+          <circle cx="365" cy="160" r="16" fill="#111" stroke="#00C850" stroke-width="1"/>
+          <circle cx="365" cy="160" r="4" fill="#00C850"/>
+          <!-- Naked bike frame - upright -->
+          <path d="M 175 150 L 180 110 L 230 90 L 280 90 L 320 100 L 355 135 L 355 150 Z" fill="#002a0e" stroke="#00C850" stroke-width="1"/>
+          <!-- Tank -->
+          <path d="M 200 90 L 280 85 L 295 100 L 195 105 Z" fill="#00601e"/>
+          <!-- Handlebar upright -->
+          <rect x="265" y="78" width="40" height="6" rx="3" fill="#333" stroke="#00C850" stroke-width="0.5"/>
+          <!-- Engine exposed -->
+          <rect x="200" y="110" width="80" height="38" rx="4" fill="#111" stroke="#00C850" stroke-width="0.5"/>
+          <line x1="210" y1="110" x2="210" y2="148" stroke="#00C850" stroke-width="0.3" opacity="0.5"/>
+          <line x1="230" y1="110" x2="230" y2="148" stroke="#00C850" stroke-width="0.3" opacity="0.5"/>
+          <line x1="250" y1="110" x2="250" y2="148" stroke="#00C850" stroke-width="0.3" opacity="0.5"/>
+          <line x1="270" y1="110" x2="270" y2="148" stroke="#00C850" stroke-width="0.3" opacity="0.5"/>
+          <line x1="175" y1="150" x2="125" y2="160" stroke="#333" stroke-width="6"/>
+          <line x1="330" y1="105" x2="363" y2="160" stroke="#333" stroke-width="6"/>
+          <ellipse cx="345" cy="100" rx="18" ry="10" fill="#111" stroke="#00C850" stroke-width="1"/>
+          <line x1="185" y1="145" x2="140" y2="150" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow"></div>
+        <div class="bike-ground"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">948cc INLINE-4</span><span class="spec-chip">125 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#00C850;">Naked · Kawasaki</div>
+        <div class="bike-name">Z900</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00C850;">125</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00C850;">248</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">Mean, lean, and ravenous. The Z900 redefines what a naked streetfighter can be at this price point.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── MARQUEE STRIP ── -->
+<div class="quote-strip">
+  <div class="quote-inner">
+    <span class="quote-item">PURE <span>SPEED</span></span>
+    <span class="quote-item">·</span>
+    <span class="quote-item">RAW <span>POWER</span></span>
+    <span class="quote-item">·</span>
+    <span class="quote-item">BORN <span>TO RACE</span></span>
+    <span class="quote-item">·</span>
+    <span class="quote-item">FEEL THE <span>THUNDER</span></span>
+    <span class="quote-item">·</span>
+    <span class="quote-item">PURE <span>SPEED</span></span>
+    <span class="quote-item">·</span>
+    <span class="quote-item">RAW <span>POWER</span></span>
+    <span class="quote-item">·</span>
+    <span class="quote-item">BORN <span>TO RACE</span></span>
+    <span class="quote-item">·</span>
+    <span class="quote-item">FEEL THE <span>THUNDER</span></span>
+    <span class="quote-item">·</span>
+  </div>
+</div>
+
+<!-- ── BMW ── -->
+<section class="brand-section brand-bmw" data-brand="bmw" id="bmw">
+  <div class="brand-bg" data-parallax="0.25"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">02 / 10</span>
+      <span class="brand-name">BMW Motorrad</span>
+    </div>
+    <p class="brand-tagline">Sheer Riding Pleasure — German engineering elevated to pure motorsport art.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #4493F8; --glow-color: rgba(68,147,248,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #4493F8; --glow-color: rgba(68,147,248,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">S1000RR</div>
+        <div class="type-badge">Superbike</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="bmwgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4493F8"/><stop offset="100%" stop-color="#003399"/></linearGradient></defs>
+          <ellipse cx="250" cy="165" rx="135" ry="15" fill="rgba(68,147,248,0.12)" filter="blur(8px)"/>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#4493F8" stroke-width="2" stroke-dasharray="11 8"/>
+          <circle cx="128" cy="160" r="20" fill="#111" stroke="#4493F8" stroke-width="1.5"/>
+          <circle cx="128" cy="160" r="6" fill="#4493F8"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#4493F8" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="372" cy="160" r="18" fill="#111" stroke="#4493F8" stroke-width="1.5"/>
+          <circle cx="372" cy="160" r="5" fill="#4493F8"/>
+          <path d="M 175 155 L 198 102 L 262 72 L 338 82 L 382 118 L 382 155 Z" fill="url(#bmwgr)" stroke="#4493F8" stroke-width="1"/>
+          <!-- BMW asymmetric headlight -->
+          <rect x="358" y="95" width="28" height="14" rx="3" fill="#111" stroke="#4493F8" stroke-width="1"/>
+          <rect x="362" y="98" width="10" height="8" rx="1" fill="rgba(68,147,248,0.7)"/>
+          <rect x="374" y="98" width="8" height="4" rx="1" fill="rgba(68,147,248,0.4)"/>
+          <path d="M 262 72 L 315 62 L 350 76 L 338 82 Z" fill="#111"/>
+          <path d="M 308 66 L 348 72 L 338 80 L 305 74 Z" fill="rgba(68,147,248,0.25)"/>
+          <line x1="175" y1="155" x2="128" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="345" y1="97" x2="370" y2="160" stroke="#333" stroke-width="7"/>
+          <path d="M 175 145 L 143 148 L 133 158" fill="none" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+          <!-- M stripe detail -->
+          <line x1="200" y1="118" x2="260" y2="110" stroke="#CC0000" stroke-width="2.5"/>
+          <line x1="200" y1="123" x2="260" y2="115" stroke="#fff" stroke-width="1"/>
+          <line x1="200" y1="126" x2="260" y2="118" stroke="#4493F8" stroke-width="1.5"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(68,147,248,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(68,147,248,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">999cc INLINE-4</span><span class="spec-chip">210 BHP</span><span class="spec-chip">ShiftCam</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#4493F8;">Superbike · BMW Motorrad</div>
+        <div class="bike-name">S1000RR</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#4493F8;">210</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#4493F8;">306</span><span class="bike-stat-key">KM/H</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#4493F8;">197</span><span class="bike-stat-key">KG</span></div>
+        </div>
+        <p class="bike-desc">The benchmark superbike. ShiftCam technology, M Package optionals, and a chassis dialed in by WSBK legends.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #4493F8; --glow-color: rgba(68,147,248,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">R1250GS</div>
+        <div class="type-badge">Adventure</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- GS Adventure bike - taller stance -->
+          <circle cx="120" cy="162" r="50" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="120" cy="162" r="50" fill="none" stroke="#4493F8" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="120" cy="162" r="20" fill="#111" stroke="#4493F8" stroke-width="1"/>
+          <circle cx="120" cy="162" r="6" fill="#4493F8"/>
+          <circle cx="380" cy="162" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="380" cy="162" r="46" fill="none" stroke="#4493F8" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="380" cy="162" r="18" fill="#111" stroke="#4493F8" stroke-width="1"/>
+          <circle cx="380" cy="162" r="5" fill="#4493F8"/>
+          <!-- More upright adventure silhouette -->
+          <path d="M 172 158 L 178 95 L 230 78 L 290 78 L 330 95 L 358 140 L 358 158 Z" fill="#003388" stroke="#4493F8" stroke-width="1"/>
+          <!-- Panniers / tank -->
+          <path d="M 200 78 L 290 75 L 300 95 L 195 100 Z" fill="#0044AA"/>
+          <!-- Beak / front -->
+          <path d="M 340 108 L 385 120 L 375 140 L 345 130 Z" fill="#002266" stroke="#4493F8" stroke-width="0.5"/>
+          <!-- Handlebar wide -->
+          <rect x="250" y="68" width="60" height="7" rx="3" fill="#333" stroke="#4493F8" stroke-width="0.5"/>
+          <!-- Boxer engine cylinders -->
+          <rect x="178" y="120" width="30" height="20" rx="3" fill="#111" stroke="#4493F8" stroke-width="0.5"/>
+          <rect x="130" y="120" width="30" height="20" rx="3" fill="#111" stroke="#4493F8" stroke-width="0.5"/>
+          <line x1="172" y1="158" x2="120" y2="162" stroke="#333" stroke-width="7"/>
+          <line x1="332" y1="106" x2="378" y2="162" stroke="#333" stroke-width="7"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(68,147,248,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(68,147,248,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1254cc BOXER</span><span class="spec-chip">136 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#4493F8;">Adventure · BMW Motorrad</div>
+        <div class="bike-name">R1250GS</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#4493F8;">136</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#4493F8;">1254cc</span><span class="bike-stat-key">Boxer</span></div>
+        </div>
+        <p class="bike-desc">The king of adventure touring. ShiftCam boxer twin, unmatched technology and the confidence to go anywhere.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-2" style="--accent-color: #4493F8; --glow-color: rgba(68,147,248,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">M1000RR</div>
+        <div class="type-badge">M Sport</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#4493F8" stroke-width="2" stroke-dasharray="11 8"/>
+          <circle cx="128" cy="160" r="20" fill="#111" stroke="#4493F8" stroke-width="1.5"/>
+          <circle cx="128" cy="160" r="6" fill="#4493F8"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#4493F8" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="372" cy="160" r="18" fill="#111" stroke="#4493F8" stroke-width="1.5"/>
+          <circle cx="372" cy="160" r="5" fill="#4493F8"/>
+          <path d="M 175 155 L 196 100 L 260 70 L 336 80 L 380 116 L 380 155 Z" fill="#001855" stroke="#4493F8" stroke-width="1.5"/>
+          <!-- M winglets -->
+          <path d="M 196 100 L 170 88 L 175 100 Z" fill="#4493F8" opacity="0.7"/>
+          <path d="M 380 116 L 405 102 L 398 118 Z" fill="#4493F8" opacity="0.5"/>
+          <path d="M 260 70 L 315 60 L 348 74 L 336 80 Z" fill="#111"/>
+          <path d="M 308 64 L 346 70 L 336 78 L 305 72 Z" fill="rgba(68,147,248,0.3)"/>
+          <rect x="356" y="93" width="30" height="16" rx="3" fill="#111" stroke="#4493F8" stroke-width="1"/>
+          <rect x="360" y="96" width="12" height="10" rx="1" fill="rgba(68,147,248,0.8)"/>
+          <line x1="175" y1="155" x2="128" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="346" y1="97" x2="370" y2="160" stroke="#333" stroke-width="7"/>
+          <!-- M stripes -->
+          <rect x="198" y="112" width="60" height="3" rx="1" fill="#CC0000"/>
+          <rect x="198" y="117" width="60" height="2" rx="1" fill="#fff"/>
+          <rect x="198" y="121" width="60" height="2" rx="1" fill="#4493F8"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(68,147,248,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(68,147,248,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">999cc INLINE-4</span><span class="spec-chip">215 BHP</span><span class="spec-chip">WINGLETS</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#4493F8;">M Sport · BMW Motorrad</div>
+        <div class="bike-name">M1000RR</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#4493F8;">215</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#4493F8;">306</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">BMW's most focused machine ever. Aerodynamic winglets, titanium rods, and a screaming inline-four homologated for racing.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── KTM ── -->
+<section class="brand-section brand-ktm" data-brand="ktm" id="ktm">
+  <div class="brand-bg" data-parallax="0.3"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">03 / 10</span>
+      <span class="brand-name">KTM</span>
+    </div>
+    <p class="brand-tagline">Ready to Race — Austrian fury distilled into orange fire and relentless torque.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #FF5500; --glow-color: rgba(255,85,0,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #FF5500; --glow-color: rgba(255,85,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">1290</div>
+        <div class="type-badge">Super Duke</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="ktmgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF5500"/><stop offset="100%" stop-color="#882200"/></linearGradient></defs>
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#FF5500" stroke-width="2" stroke-dasharray="10 8"/>
+          <circle cx="125" cy="160" r="18" fill="#111" stroke="#FF5500" stroke-width="1.5"/>
+          <circle cx="125" cy="160" r="5" fill="#FF5500"/>
+          <circle cx="368" cy="160" r="43" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="368" cy="160" r="43" fill="none" stroke="#FF5500" stroke-width="2" stroke-dasharray="9 7"/>
+          <circle cx="368" cy="160" r="17" fill="#111" stroke="#FF5500" stroke-width="1.5"/>
+          <circle cx="368" cy="160" r="5" fill="#FF5500"/>
+          <!-- Super Duke naked aggressive -->
+          <path d="M 173 152 L 182 108 L 235 88 L 285 88 L 325 102 L 355 138 L 355 152 Z" fill="url(#ktmgr)" stroke="#FF5500" stroke-width="1"/>
+          <!-- Tank sharp KTM -->
+          <path d="M 205 88 L 285 84 L 300 102 L 200 105 Z" fill="#CC3300"/>
+          <!-- Handlebar naked upright -->
+          <rect x="258" y="76" width="42" height="6" rx="3" fill="#333" stroke="#FF5500" stroke-width="0.5"/>
+          <!-- LC8 engine -->
+          <rect x="200" y="115" width="85" height="35" rx="4" fill="#111" stroke="#FF5500" stroke-width="0.5"/>
+          <ellipse cx="220" cy="115" rx="12" ry="6" fill="#222" stroke="#FF5500" stroke-width="0.5"/>
+          <ellipse cx="265" cy="115" rx="12" ry="6" fill="#222" stroke="#FF5500" stroke-width="0.5"/>
+          <!-- WP fork -->
+          <line x1="173" y1="152" x2="125" y2="160" stroke="#333" stroke-width="6"/>
+          <line x1="325" y1="102" x2="366" y2="160" stroke="#FF6600" stroke-width="6"/>
+          <line x1="335" y1="104" x2="370" y2="160" stroke="#222" stroke-width="4"/>
+          <!-- Headlight aggressive -->
+          <polygon points="340,90 370,96 368,112 336,106" fill="#111" stroke="#FF5500" stroke-width="1"/>
+          <polygon points="344,93 366,98 364,108 340,103" fill="rgba(255,85,0,0.6)"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(255,85,0,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(255,85,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1301cc V-TWIN</span><span class="spec-chip">180 BHP</span><span class="spec-chip">BEAST MODE</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#FF5500;">Super Naked · KTM</div>
+        <div class="bike-name">Super Duke 1290R</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FF5500;">180</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FF5500;">1301cc</span><span class="bike-stat-key">V-Twin</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FF5500;">189</span><span class="bike-stat-key">KM/H+</span></div>
+        </div>
+        <p class="bike-desc">The Beast. The most savage naked bike ever built — a V-twin wrapped in aggressive origami bodywork and track-spec suspension.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #FF5500; --glow-color: rgba(255,85,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">RC8R</div>
+        <div class="type-badge">Sportbike</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#FF5500" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="128" cy="160" r="19" fill="#111" stroke="#FF5500" stroke-width="1"/>
+          <circle cx="128" cy="160" r="5" fill="#FF5500"/>
+          <circle cx="372" cy="160" r="43" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="372" cy="160" r="43" fill="none" stroke="#FF5500" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="372" cy="160" r="17" fill="#111" stroke="#FF5500" stroke-width="1"/>
+          <circle cx="372" cy="160" r="4" fill="#FF5500"/>
+          <path d="M 176 154 L 198 103 L 258 74 L 336 83 L 378 118 L 378 154 Z" fill="#882200" stroke="#FF5500" stroke-width="1"/>
+          <path d="M 258 74 L 310 64 L 348 78 L 336 83 Z" fill="#111"/>
+          <path d="M 306 67 L 346 74 L 337 81 L 303 74 Z" fill="rgba(255,85,0,0.3)"/>
+          <line x1="176" y1="154" x2="128" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="340" y1="98" x2="370" y2="160" stroke="#FF6600" stroke-width="6"/>
+          <ellipse cx="362" cy="108" rx="14" ry="9" fill="#111" stroke="#FF5500" stroke-width="1"/>
+          <ellipse cx="362" cy="108" rx="7" ry="5" fill="rgba(255,85,0,0.7)"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(255,85,0,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(255,85,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1195cc V-TWIN</span><span class="spec-chip">155 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#FF5500;">Sportbike · KTM</div>
+        <div class="bike-name">RC 8R</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FF5500;">155</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FF5500;">280</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">Race-bred V-twin sportbike with MotoGP-derived aerodynamics and spine-tingling exhaust note.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-2" style="--accent-color: #FF5500; --glow-color: rgba(255,85,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">Duke390</div>
+        <div class="type-badge">Street Naked</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="125" cy="162" r="44" fill="none" stroke="#1a1a1a" stroke-width="11"/>
+          <circle cx="125" cy="162" r="44" fill="none" stroke="#FF5500" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="125" cy="162" r="17" fill="#111" stroke="#FF5500" stroke-width="1"/>
+          <circle cx="125" cy="162" r="5" fill="#FF5500"/>
+          <circle cx="368" cy="162" r="40" fill="none" stroke="#1a1a1a" stroke-width="11"/>
+          <circle cx="368" cy="162" r="40" fill="none" stroke="#FF5500" stroke-width="1.5" stroke-dasharray="8 7"/>
+          <circle cx="368" cy="162" r="16" fill="#111" stroke="#FF5500" stroke-width="1"/>
+          <circle cx="368" cy="162" r="4" fill="#FF5500"/>
+          <path d="M 170 156 L 178 112 L 230 95 L 278 95 L 316 108 L 346 142 L 346 156 Z" fill="#882200" stroke="#FF5500" stroke-width="1"/>
+          <path d="M 203 95 L 278 91 L 293 108 L 198 112 Z" fill="#AA2800"/>
+          <rect x="255" y="80" width="38" height="5" rx="2" fill="#333" stroke="#FF5500" stroke-width="0.5"/>
+          <rect x="200" y="116" width="75" height="32" rx="3" fill="#111" stroke="#FF5500" stroke-width="0.5"/>
+          <line x1="170" y1="156" x2="125" y2="162" stroke="#333" stroke-width="6"/>
+          <line x1="320" y1="108" x2="366" y2="162" stroke="#FF6600" stroke-width="5"/>
+          <polygon points="332,95 358,102 356,116 328,110" fill="#111" stroke="#FF5500" stroke-width="1"/>
+          <polygon points="335,98 354,104 352,112 332,106" fill="rgba(255,85,0,0.65)"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(255,85,0,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(255,85,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">399cc SINGLE</span><span class="spec-chip">45 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#FF5500;">Street Naked · KTM</div>
+        <div class="bike-name">Duke 390</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FF5500;">45</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FF5500;">167</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">The gateway drug. Razor-sharp handling and aggressive styling packed into a nimble, accessible package that punches well above weight.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── SUZUKI ── -->
+<section class="brand-section brand-suzuki" data-brand="suzuki" id="suzuki">
+  <div class="brand-bg" data-parallax="0.25"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">04 / 10</span>
+      <span class="brand-name">SUZUKI</span>
+    </div>
+    <p class="brand-tagline">Way of Life — From streetfighter icon to the World's Fastest Production Bike.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #00D4FF; --glow-color: rgba(0,212,255,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #00D4FF; --glow-color: rgba(0,212,255,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">BUSA</div>
+        <div class="type-badge">Hypersport</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="suzgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00D4FF"/><stop offset="100%" stop-color="#004466"/></linearGradient></defs>
+          <circle cx="125" cy="160" r="48" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="125" cy="160" r="48" fill="none" stroke="#00D4FF" stroke-width="2" stroke-dasharray="11 8"/>
+          <circle cx="125" cy="160" r="20" fill="#111" stroke="#00D4FF" stroke-width="1.5"/>
+          <circle cx="125" cy="160" r="6" fill="#00D4FF"/>
+          <circle cx="375" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="375" cy="160" r="44" fill="none" stroke="#00D4FF" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="375" cy="160" r="18" fill="#111" stroke="#00D4FF" stroke-width="1.5"/>
+          <circle cx="375" cy="160" r="5" fill="#00D4FF"/>
+          <!-- Hayabusa unmistakable rounded body -->
+          <path d="M 172 155 L 188 95 L 250 68 L 340 78 L 388 122 L 388 155 Z" fill="url(#suzgr)" stroke="#00D4FF" stroke-width="1"/>
+          <!-- Iconic round nose -->
+          <ellipse cx="385" cy="118" rx="22" ry="28" fill="#003344" stroke="#00D4FF" stroke-width="1"/>
+          <ellipse cx="385" cy="112" rx="12" ry="12" fill="rgba(0,212,255,0.5)"/>
+          <path d="M 250 68 L 308 60 L 348 74 L 340 78 Z" fill="#111"/>
+          <path d="M 305 63 L 345 70 L 338 76 L 302 68 Z" fill="rgba(0,212,255,0.25)"/>
+          <line x1="172" y1="155" x2="125" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="350" y1="94" x2="373" y2="160" stroke="#333" stroke-width="7"/>
+          <!-- Dual exhausts -->
+          <path d="M 172 142 L 135 142 L 128 158" fill="none" stroke="#777" stroke-width="6" stroke-linecap="round"/>
+          <path d="M 172 150 L 138 150 L 130 162" fill="none" stroke="#555" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(0,212,255,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(0,212,255,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1340cc INLINE-4</span><span class="spec-chip">190 BHP</span><span class="spec-chip">299 KM/H</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#00D4FF;">Hypersport · Suzuki</div>
+        <div class="bike-name">GSX1300R Hayabusa</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00D4FF;">190</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00D4FF;">299</span><span class="bike-stat-key">KM/H</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00D4FF;">1340cc</span><span class="bike-stat-key">Engine</span></div>
+        </div>
+        <p class="bike-desc">A legend reborn. The Hayabusa's aerodynamic silhouette cuts air like a hawk, with devastatingly smooth power delivery and iconic presence.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #00D4FF; --glow-color: rgba(0,212,255,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">GSXR</div>
+        <div class="type-badge">Superbike</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="128" cy="160" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="128" cy="160" r="46" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="128" cy="160" r="19" fill="#111" stroke="#00D4FF" stroke-width="1"/>
+          <circle cx="128" cy="160" r="5" fill="#00D4FF"/>
+          <circle cx="372" cy="160" r="43" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="372" cy="160" r="43" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="372" cy="160" r="17" fill="#111" stroke="#00D4FF" stroke-width="1"/>
+          <circle cx="372" cy="160" r="4" fill="#00D4FF"/>
+          <path d="M 176 154 L 197 102 L 260 73 L 335 82 L 377 118 L 377 154 Z" fill="#003355" stroke="#00D4FF" stroke-width="1"/>
+          <path d="M 260 73 L 312 63 L 348 77 L 335 82 Z" fill="#111"/>
+          <path d="M 308 67 L 346 73 L 335 80 L 305 73 Z" fill="rgba(0,212,255,0.3)"/>
+          <ellipse cx="368" cy="108" rx="14" ry="9" fill="#111" stroke="#00D4FF" stroke-width="1"/>
+          <ellipse cx="368" cy="108" rx="7" ry="4" fill="rgba(0,212,255,0.7)"/>
+          <line x1="176" y1="154" x2="128" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="340" y1="98" x2="370" y2="160" stroke="#333" stroke-width="7"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(0,212,255,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(0,212,255,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">999cc INLINE-4</span><span class="spec-chip">202 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#00D4FF;">Superbike · Suzuki</div>
+        <div class="bike-name">GSX-R1000R</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00D4FF;">202</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00D4FF;">299</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">MotoGP-derived variable valve timing, race-derived electronics suite, and a chassis that forgives like a mentor but attacks like a rival.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-2" style="--accent-color: #00D4FF; --glow-color: rgba(0,212,255,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">KATANA</div>
+        <div class="type-badge">Retro Sport</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="125" cy="162" r="44" fill="none" stroke="#1a1a1a" stroke-width="11"/>
+          <circle cx="125" cy="162" r="44" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="125" cy="162" r="17" fill="#111" stroke="#00D4FF" stroke-width="1"/>
+          <circle cx="125" cy="162" r="4" fill="#00D4FF"/>
+          <circle cx="370" cy="162" r="41" fill="none" stroke="#1a1a1a" stroke-width="11"/>
+          <circle cx="370" cy="162" r="41" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-dasharray="8 7"/>
+          <circle cx="370" cy="162" r="16" fill="#111" stroke="#00D4FF" stroke-width="1"/>
+          <circle cx="370" cy="162" r="4" fill="#00D4FF"/>
+          <!-- Katana angular design -->
+          <path d="M 172 156 L 183 108 L 240 88 L 310 88 L 350 112 L 356 156 Z" fill="#004466" stroke="#00D4FF" stroke-width="1"/>
+          <!-- Iconic Katana tank -->
+          <path d="M 200 88 L 310 84 L 325 108 L 195 112 Z" fill="#005577"/>
+          <!-- Classic round headlight -->
+          <circle cx="360" cy="112" r="22" fill="#111" stroke="#00D4FF" stroke-width="1.5"/>
+          <circle cx="360" cy="112" r="12" fill="rgba(0,212,255,0.5)"/>
+          <circle cx="360" cy="112" r="5" fill="rgba(0,212,255,0.9)"/>
+          <rect x="262" y="76" width="38" height="5" rx="2" fill="#333" stroke="#00D4FF" stroke-width="0.5"/>
+          <line x1="172" y1="156" x2="125" y2="162" stroke="#333" stroke-width="6"/>
+          <line x1="338" y1="108" x2="368" y2="162" stroke="#333" stroke-width="6"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(0,212,255,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(0,212,255,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">999cc INLINE-4</span><span class="spec-chip">150 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#00D4FF;">Retro Sport · Suzuki</div>
+        <div class="bike-name">Katana</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00D4FF;">150</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#00D4FF;">260</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">A samurai reborn. The angular, iconic Katana styling returns with modern mechanicals beneath, turning heads everywhere it glides.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── APRILIA ── -->
+<section class="brand-section brand-aprilia" data-brand="aprilia" id="aprilia">
+  <div class="brand-bg" data-parallax="0.3"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">05 / 10</span>
+      <span class="brand-name">APRILIA</span>
+    </div>
+    <p class="brand-tagline">Born on Track — Italian racing DNA, MotoGP derived excellence from Noale.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #E8002A; --glow-color: rgba(232,0,42,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #E8002A; --glow-color: rgba(232,0,42,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">RSV4</div>
+        <div class="type-badge">Superbike</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="aprgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E8002A"/><stop offset="100%" stop-color="#660010"/></linearGradient></defs>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#E8002A" stroke-width="2" stroke-dasharray="11 8"/>
+          <circle cx="128" cy="160" r="19" fill="#111" stroke="#E8002A" stroke-width="1.5"/>
+          <circle cx="128" cy="160" r="5" fill="#E8002A"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#E8002A" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="372" cy="160" r="18" fill="#111" stroke="#E8002A" stroke-width="1.5"/>
+          <circle cx="372" cy="160" r="5" fill="#E8002A"/>
+          <path d="M 176 155 L 198 102 L 260 72 L 338 82 L 380 118 L 380 155 Z" fill="url(#aprgr)" stroke="#E8002A" stroke-width="1"/>
+          <path d="M 260 72 L 315 62 L 350 76 L 338 82 Z" fill="#111"/>
+          <path d="M 310 65 L 348 72 L 338 80 L 307 73 Z" fill="rgba(232,0,42,0.3)"/>
+          <!-- RSV4 triple headlights -->
+          <ellipse cx="375" cy="104" rx="8" ry="6" fill="#111" stroke="#E8002A" stroke-width="1"/>
+          <ellipse cx="375" cy="104" rx="4" ry="3" fill="rgba(232,0,42,0.8)"/>
+          <ellipse cx="372" cy="115" rx="7" ry="5" fill="#111" stroke="#E8002A" stroke-width="0.5"/>
+          <ellipse cx="372" cy="115" rx="3" ry="2.5" fill="rgba(232,0,42,0.6)"/>
+          <line x1="176" y1="155" x2="128" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="344" y1="98" x2="370" y2="160" stroke="#333" stroke-width="7"/>
+          <!-- Winglets -->
+          <path d="M 198 102 L 172 90 L 176 104 Z" fill="#E8002A" opacity="0.6"/>
+          <path d="M 380 118 L 406 104 L 400 120 Z" fill="#E8002A" opacity="0.4"/>
+          <path d="M 176 144 L 140 147 L 132 158" fill="none" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(232,0,42,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(232,0,42,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1099cc V4</span><span class="spec-chip">217 BHP</span><span class="spec-chip">APRC</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E8002A;">Superbike · Aprilia</div>
+        <div class="bike-name">RSV4 Factory</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8002A;">217</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8002A;">299</span><span class="bike-stat-key">KM/H</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8002A;">1099cc</span><span class="bike-stat-key">V4</span></div>
+        </div>
+        <p class="bike-desc">MotoGP on the road. The RSV4 Factory blends pure Italian passion with race-derived APRC electronics and a screaming narrow-angle V4.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #E8002A; --glow-color: rgba(232,0,42,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">TUONO</div>
+        <div class="type-badge">Super Naked</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#E8002A" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="125" cy="160" r="18" fill="#111" stroke="#E8002A" stroke-width="1"/>
+          <circle cx="125" cy="160" r="5" fill="#E8002A"/>
+          <circle cx="368" cy="160" r="42" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="368" cy="160" r="42" fill="none" stroke="#E8002A" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="368" cy="160" r="16" fill="#111" stroke="#E8002A" stroke-width="1"/>
+          <circle cx="368" cy="160" r="4" fill="#E8002A"/>
+          <path d="M 173 152 L 183 108 L 238 88 L 290 88 L 328 105 L 358 140 L 358 152 Z" fill="#660010" stroke="#E8002A" stroke-width="1"/>
+          <path d="M 208 88 L 290 84 L 305 105 L 203 108 Z" fill="#880018"/>
+          <rect x="263" y="75" width="42" height="6" rx="3" fill="#333" stroke="#E8002A" stroke-width="0.5"/>
+          <rect x="200" y="115" width="90" height="35" rx="4" fill="#111" stroke="#E8002A" stroke-width="0.5"/>
+          <!-- V4 engine details -->
+          <line x1="215" y1="115" x2="215" y2="150" stroke="#E8002A" stroke-width="0.3" opacity="0.4"/>
+          <line x1="235" y1="115" x2="235" y2="150" stroke="#E8002A" stroke-width="0.3" opacity="0.4"/>
+          <line x1="255" y1="115" x2="255" y2="150" stroke="#E8002A" stroke-width="0.3" opacity="0.4"/>
+          <line x1="275" y1="115" x2="275" y2="150" stroke="#E8002A" stroke-width="0.3" opacity="0.4"/>
+          <line x1="173" y1="152" x2="125" y2="160" stroke="#333" stroke-width="6"/>
+          <line x1="328" y1="105" x2="366" y2="160" stroke="#333" stroke-width="6"/>
+          <!-- Headlights twin -->
+          <ellipse cx="348" cy="98" rx="16" ry="10" fill="#111" stroke="#E8002A" stroke-width="1"/>
+          <ellipse cx="342" cy="96" rx="6" ry="4" fill="rgba(232,0,42,0.7)"/>
+          <ellipse cx="354" cy="100" rx="5" ry="3" fill="rgba(232,0,42,0.5)"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(232,0,42,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(232,0,42,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1099cc V4</span><span class="spec-chip">175 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E8002A;">Super Naked · Aprilia</div>
+        <div class="bike-name">Tuono V4 Factory</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8002A;">175</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8002A;">285</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">Thunder in Italian. The Tuono distills RSV4 excellence into a street-focused package that can embarrass anything on a twisty road.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── ROYAL ENFIELD ── -->
+<section class="brand-section brand-re" data-brand="re" id="re">
+  <div class="brand-bg" data-parallax="0.25"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">06 / 10</span>
+      <span class="brand-name">Royal Enfield</span>
+    </div>
+    <p class="brand-tagline">Pure Motorcycling — Heritage, thump, and the soul of the open road since 1901.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #E8A000; --glow-color: rgba(232,160,0,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #E8A000; --glow-color: rgba(232,160,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">HIMALAYAN</div>
+        <div class="type-badge">Adventure</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="regr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E8A000"/><stop offset="100%" stop-color="#664400"/></linearGradient></defs>
+          <circle cx="118" cy="162" r="50" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="118" cy="162" r="50" fill="none" stroke="#E8A000" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="118" cy="162" r="20" fill="#111" stroke="#E8A000" stroke-width="1"/>
+          <circle cx="118" cy="162" r="6" fill="#E8A000"/>
+          <circle cx="382" cy="162" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="382" cy="162" r="46" fill="none" stroke="#E8A000" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="382" cy="162" r="18" fill="#111" stroke="#E8A000" stroke-width="1"/>
+          <circle cx="382" cy="162" r="5" fill="#E8A000"/>
+          <!-- Himalayan upright ADV -->
+          <path d="M 170 158 L 178 95 L 232 78 L 295 78 L 335 100 L 362 145 L 362 158 Z" fill="#664400" stroke="#E8A000" stroke-width="1"/>
+          <path d="M 205 78 L 295 75 L 308 100 L 200 104 Z" fill="#885500"/>
+          <!-- Round headlight -->
+          <circle cx="358" cy="108" r="26" fill="#111" stroke="#E8A000" stroke-width="1.5"/>
+          <circle cx="358" cy="108" r="14" fill="rgba(232,160,0,0.5)"/>
+          <circle cx="358" cy="108" r="6" fill="rgba(232,160,0,0.9)"/>
+          <!-- Wide handlebars -->
+          <rect x="240" y="65" width="72" height="7" rx="3" fill="#333" stroke="#E8A000" stroke-width="0.5"/>
+          <!-- Single cylinder engine -->
+          <rect x="200" y="118" width="65" height="38" rx="5" fill="#111" stroke="#E8A000" stroke-width="0.5"/>
+          <rect x="215" y="108" width="35" height="12" rx="3" fill="#222" stroke="#E8A000" stroke-width="0.5"/>
+          <!-- High exhaust pipe -->
+          <path d="M 170 148 L 145 130 L 130 125 L 120 135 L 120 162" fill="none" stroke="#777" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="170" y1="158" x2="118" y2="162" stroke="#333" stroke-width="7"/>
+          <line x1="335" y1="100" x2="380" y2="162" stroke="#333" stroke-width="7"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(232,160,0,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(232,160,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">452cc PARALLEL-TWIN</span><span class="spec-chip">40 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E8A000;">Adventure · Royal Enfield</div>
+        <div class="bike-name">Himalayan 452</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8A000;">40</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8A000;">160</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">Made for mountains, roads less traveled, and journeys with no fixed endpoint. The Himalayan's new twin is a revelation of accessible adventure.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #E8A000; --glow-color: rgba(232,160,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">650</div>
+        <div class="type-badge">Classic</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="122" cy="162" r="47" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="122" cy="162" r="47" fill="none" stroke="#E8A000" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="122" cy="162" r="19" fill="#111" stroke="#E8A000" stroke-width="1"/>
+          <circle cx="122" cy="162" r="6" fill="#E8A000"/>
+          <circle cx="375" cy="162" r="43" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="375" cy="162" r="43" fill="none" stroke="#E8A000" stroke-width="1.5" stroke-dasharray="8 7"/>
+          <circle cx="375" cy="162" r="17" fill="#111" stroke="#E8A000" stroke-width="1"/>
+          <circle cx="375" cy="162" r="5" fill="#E8A000"/>
+          <!-- Classic/Retro profile -->
+          <path d="M 170 158 L 178 108 L 235 92 L 305 92 L 340 115 L 360 158 Z" fill="#4a2800" stroke="#E8A000" stroke-width="1"/>
+          <path d="M 210 92 L 305 88 L 318 115 L 205 118 Z" fill="#663800"/>
+          <!-- Classic round headlight -->
+          <circle cx="360" cy="118" rx="24" fill="#111" stroke="#E8A000" stroke-width="1.5" r="22"/>
+          <circle cx="360" cy="118" r="12" fill="rgba(232,160,0,0.5)"/>
+          <circle cx="360" cy="118" r="5" fill="rgba(232,160,0,0.9)"/>
+          <rect x="260" y="78" width="42" height="6" rx="2" fill="#333" stroke="#E8A000" stroke-width="0.5"/>
+          <rect x="205" y="120" width="80" height="36" rx="6" fill="#111" stroke="#E8A000" stroke-width="0.5"/>
+          <!-- Chrome exhaust -->
+          <path d="M 170 145 L 140 148 L 130 158 L 122 162" fill="none" stroke="#999" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="170" y1="158" x2="122" y2="162" stroke="#333" stroke-width="7"/>
+          <line x1="338" y1="114" x2="373" y2="162" stroke="#333" stroke-width="7"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(232,160,0,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(232,160,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">648cc PARALLEL-TWIN</span><span class="spec-chip">47 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E8A000;">Classic · Royal Enfield</div>
+        <div class="bike-name">Interceptor 650</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8A000;">47</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E8A000;">175</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">Britain meets Madras. The Interceptor 650 proves that a motorcycle can be joyful, accessible and characterful all at once.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── HARLEY DAVIDSON ── -->
+<section class="brand-section brand-harley" data-brand="harley" id="harley">
+  <div class="brand-bg" data-parallax="0.3"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">07 / 10</span>
+      <span class="brand-name">Harley Davidson</span>
+    </div>
+    <p class="brand-tagline">Live by It — American iron, freedom culture, and the iconic potato-potato rumble since 1903.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #FFB800; --glow-color: rgba(255,184,0,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #FFB800; --glow-color: rgba(255,184,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">FATBOY</div>
+        <div class="type-badge">Cruiser</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="hdgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFB800"/><stop offset="100%" stop-color="#664400"/></linearGradient></defs>
+          <!-- Fat wide rear tire -->
+          <circle cx="132" cy="165" r="52" fill="none" stroke="#222" stroke-width="20"/>
+          <circle cx="132" cy="165" r="52" fill="none" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="132" cy="165" r="25" fill="#111" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="132" cy="165" r="8" fill="#FFB800"/>
+          <!-- Fat front tire -->
+          <circle cx="376" cy="165" r="48" fill="none" stroke="#222" stroke-width="18"/>
+          <circle cx="376" cy="165" r="48" fill="none" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="376" cy="165" r="22" fill="#111" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="376" cy="165" r="7" fill="#FFB800"/>
+          <!-- Low cruiser profile -->
+          <path d="M 184 155 L 190 118 L 240 102 L 320 102 L 360 125 L 375 155 Z" fill="#333" stroke="#FFB800" stroke-width="1"/>
+          <!-- Fat tank -->
+          <path d="M 205 102 L 320 98 L 338 125 L 200 128 Z" fill="url(#hdgr)"/>
+          <!-- Big V-twin engine -->
+          <path d="M 200 128 L 200 162 L 240 165 L 285 162 L 285 125 Z" fill="#111" stroke="#FFB800" stroke-width="0.5"/>
+          <!-- Cylinder fins -->
+          <line x1="202" y1="132" x2="240" y2="128" stroke="#FFB800" stroke-width="0.4" opacity="0.5"/>
+          <line x1="202" y1="138" x2="240" y2="134" stroke="#FFB800" stroke-width="0.4" opacity="0.5"/>
+          <line x1="202" y1="144" x2="240" y2="140" stroke="#FFB800" stroke-width="0.4" opacity="0.5"/>
+          <line x1="202" y1="150" x2="240" y2="146" stroke="#FFB800" stroke-width="0.4" opacity="0.5"/>
+          <line x1="248" y1="125" x2="285" y2="128" stroke="#FFB800" stroke-width="0.4" opacity="0.5"/>
+          <line x1="248" y1="131" x2="285" y2="134" stroke="#FFB800" stroke-width="0.4" opacity="0.5"/>
+          <line x1="248" y1="137" x2="285" y2="140" stroke="#FFB800" stroke-width="0.4" opacity="0.5"/>
+          <!-- Forward controls / frame -->
+          <line x1="205" y1="155" x2="160" y2="162" stroke="#555" stroke-width="5"/>
+          <!-- Springer fork -->
+          <line x1="340" y1="118" x2="374" y2="165" stroke="#555" stroke-width="8" stroke-linecap="round"/>
+          <!-- Circular headlight -->
+          <circle cx="372" cy="115" r="24" fill="#111" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="372" cy="115" r="12" fill="rgba(255,184,0,0.5)"/>
+          <circle cx="372" cy="115" r="5" fill="rgba(255,184,0,0.9)"/>
+          <!-- Low handlebars / apes -->
+          <path d="M 258 95 Q 258 78 235 72" fill="none" stroke="#333" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 282 95 Q 282 78 305 72" fill="none" stroke="#333" stroke-width="5" stroke-linecap="round"/>
+          <!-- Exhaust -->
+          <path d="M 184 148 L 155 152 L 140 162" fill="none" stroke="#888" stroke-width="9" stroke-linecap="round"/>
+          <path d="M 184 155 L 158 158 L 145 168" fill="none" stroke="#666" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(255,184,0,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(255,184,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1868cc V-TWIN</span><span class="spec-chip">93 LB-FT TORQUE</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#FFB800;">Cruiser · Harley-Davidson</div>
+        <div class="bike-name">Fat Boy 114</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FFB800;">114ci</span><span class="bike-stat-key">Milwaukee-8</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FFB800;">166</span><span class="bike-stat-key">NM Torque</span></div>
+        </div>
+        <p class="bike-desc">Undeniably iconic. Solid-wheel rims, fat rubber, and the Milwaukee-Eight thumping out enough torque to pull planets from orbit.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #FFB800; --glow-color: rgba(255,184,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">SGIDE</div>
+        <div class="type-badge">Bagger</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="128" cy="162" r="50" fill="none" stroke="#222" stroke-width="16"/>
+          <circle cx="128" cy="162" r="50" fill="none" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="128" cy="162" r="22" fill="#111" stroke="#FFB800" stroke-width="1"/>
+          <circle cx="128" cy="162" r="7" fill="#FFB800"/>
+          <circle cx="378" cy="162" r="45" fill="none" stroke="#222" stroke-width="15"/>
+          <circle cx="378" cy="162" r="45" fill="none" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="378" cy="162" r="18" fill="#111" stroke="#FFB800" stroke-width="1"/>
+          <circle cx="378" cy="162" r="6" fill="#FFB800"/>
+          <!-- Street glide batwing fairing -->
+          <path d="M 180 152 L 188 108 L 245 90 L 330 90 L 368 120 L 378 152 Z" fill="#222" stroke="#FFB800" stroke-width="1"/>
+          <!-- Big tank -->
+          <path d="M 210 90 L 330 86 L 348 120 L 205 124 Z" fill="#333"/>
+          <!-- Saddlebags -->
+          <rect x="170" y="130" width="30" height="28" rx="4" fill="#222" stroke="#FFB800" stroke-width="0.5"/>
+          <!-- Batwing fairing detail -->
+          <path d="M 332 100 L 380 115 L 380 138 L 355 145 L 330 138 L 325 115 Z" fill="#1a1a1a" stroke="#FFB800" stroke-width="1"/>
+          <ellipse cx="365" cy="118" rx="10" ry="7" fill="rgba(255,184,0,0.6)"/>
+          <rect x="335" y="128" width="18" height="8" rx="2" fill="rgba(255,184,0,0.3)" stroke="#FFB800" stroke-width="0.5"/>
+          <!-- Fork -->
+          <line x1="345" y1="110" x2="376" y2="162" stroke="#555" stroke-width="8"/>
+          <!-- Handlebars/fairing top -->
+          <path d="M 255 85 Q 255 68 232 64" fill="none" stroke="#333" stroke-width="5"/>
+          <path d="M 278 85 Q 278 68 302 64" fill="none" stroke="#333" stroke-width="5"/>
+          <!-- Chrome exhaust -->
+          <path d="M 180 142 L 148 145 L 132 162" fill="none" stroke="#999" stroke-width="8" stroke-linecap="round"/>
+          <path d="M 180 148 L 150 152 L 136 165" fill="none" stroke="#777" stroke-width="6" stroke-linecap="round"/>
+          <line x1="180" y1="152" x2="128" y2="162" stroke="#333" stroke-width="7"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(255,184,0,0.4);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(255,184,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1868cc V-TWIN</span><span class="spec-chip">INFOTAINMENT</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#FFB800;">Bagger · Harley-Davidson</div>
+        <div class="bike-name">Street Glide Special</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FFB800;">114ci</span><span class="bike-stat-key">Milwaukee-8</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#FFB800;">160</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">The highway king. Sleek batwing fairing, booming BOOM! audio system, and that unmistakable V-twin pulse that defines American motorcycling.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── DUCATI ── -->
+<section class="brand-section brand-ducati" data-brand="ducati" id="ducati">
+  <div class="brand-bg" data-parallax="0.3"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">08 / 10</span>
+      <span class="brand-name">DUCATI</span>
+    </div>
+    <p class="brand-tagline">Born in Bologna — Desmodromic valves, Trellis frames and racing soul since 1926.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #E00000; --glow-color: rgba(220,0,0,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #E00000; --glow-color: rgba(220,0,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">V4R</div>
+        <div class="type-badge">Superbike</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="ducgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E00000"/><stop offset="100%" stop-color="#6a0000"/></linearGradient></defs>
+          <circle cx="127" cy="160" r="48" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="127" cy="160" r="48" fill="none" stroke="#E00000" stroke-width="2" stroke-dasharray="11 8"/>
+          <circle cx="127" cy="160" r="20" fill="#111" stroke="#E00000" stroke-width="1.5"/>
+          <circle cx="127" cy="160" r="6" fill="#E00000"/>
+          <circle cx="373" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="373" cy="160" r="44" fill="none" stroke="#E00000" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="373" cy="160" r="18" fill="#111" stroke="#E00000" stroke-width="1.5"/>
+          <circle cx="373" cy="160" r="5" fill="#E00000"/>
+          <path d="M 175 154 L 198 100 L 262 70 L 340 80 L 385 118 L 385 154 Z" fill="url(#ducgr)" stroke="#E00000" stroke-width="1.5"/>
+          <!-- Ducati front wing -->
+          <path d="M 200 100 L 174 86 L 178 100 Z" fill="#E00000" opacity="0.7"/>
+          <path d="M 385 118 L 412 100 L 404 120 Z" fill="#E00000" opacity="0.5"/>
+          <path d="M 262 70 L 318 60 L 352 74 L 340 80 Z" fill="#111"/>
+          <path d="M 314 63 L 350 70 L 340 78 L 311 70 Z" fill="rgba(220,0,0,0.3)"/>
+          <!-- Twin LED headlights -->
+          <ellipse cx="377" cy="102" rx="10" ry="7" fill="#111" stroke="#E00000" stroke-width="1"/>
+          <ellipse cx="377" cy="102" rx="5" ry="3" fill="rgba(220,0,0,0.9)"/>
+          <ellipse cx="374" cy="114" rx="9" ry="6" fill="#111" stroke="#E00000" stroke-width="0.5"/>
+          <ellipse cx="374" cy="114" rx="4" ry="3" fill="rgba(220,0,0,0.7)"/>
+          <line x1="175" y1="154" x2="127" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="347" y1="96" x2="371" y2="160" stroke="#333" stroke-width="7"/>
+          <!-- Trellis frame detail -->
+          <line x1="200" y1="100" x2="230" y2="120" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+          <line x1="230" y1="120" x2="260" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+          <line x1="260" y1="100" x2="290" y2="120" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+          <path d="M 175 142 L 140 145 L 130 158" fill="none" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(220,0,0,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(220,0,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">998cc V4</span><span class="spec-chip">240 BHP</span><span class="spec-chip">DESMOSEDICI</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E00000;">Superbike · Ducati</div>
+        <div class="bike-name">Panigale V4R</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E00000;">240</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E00000;">299</span><span class="bike-stat-key">KM/H</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E00000;">172</span><span class="bike-stat-key">KG</span></div>
+        </div>
+        <p class="bike-desc">The closest thing to a MotoGP machine you can ride on the road. Desmosedici Stradale V4, full carbon aero package, pure Ducati desire.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #E00000; --glow-color: rgba(220,0,0,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">MONSTER</div>
+        <div class="type-badge">Naked</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#E00000" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="125" cy="160" r="18" fill="#111" stroke="#E00000" stroke-width="1"/>
+          <circle cx="125" cy="160" r="5" fill="#E00000"/>
+          <circle cx="368" cy="160" r="42" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="368" cy="160" r="42" fill="none" stroke="#E00000" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="368" cy="160" r="16" fill="#111" stroke="#E00000" stroke-width="1"/>
+          <circle cx="368" cy="160" r="4" fill="#E00000"/>
+          <path d="M 173 152 L 183 108 L 240 88 L 295 88 L 332 108 L 356 142 L 356 152 Z" fill="#6a0000" stroke="#E00000" stroke-width="1"/>
+          <!-- Monster tank iconic shape -->
+          <path d="M 208 88 L 295 84 L 308 108 L 202 112 Z" fill="#880000"/>
+          <!-- Round headlight Monster -->
+          <circle cx="350" cy="106" r="22" fill="#111" stroke="#E00000" stroke-width="1.5"/>
+          <circle cx="350" cy="106" r="12" fill="rgba(220,0,0,0.5)"/>
+          <circle cx="350" cy="106" r="5" fill="rgba(220,0,0,0.9)"/>
+          <rect x="262" y="74" width="42" height="6" rx="3" fill="#333" stroke="#E00000" stroke-width="0.5"/>
+          <!-- Trellis frame visible -->
+          <line x1="183" y1="108" x2="210" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+          <line x1="210" y1="130" x2="240" y2="108" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+          <rect x="200" y="115" width="85" height="35" rx="4" fill="#111" stroke="#E00000" stroke-width="0.5"/>
+          <line x1="173" y1="152" x2="125" y2="160" stroke="#333" stroke-width="6"/>
+          <line x1="330" y1="108" x2="366" y2="160" stroke="#333" stroke-width="6"/>
+          <!-- Exhausts high -->
+          <path d="M 173 142 L 152 140 L 138 156" fill="none" stroke="#777" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(220,0,0,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(220,0,0,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">937cc L-TWIN</span><span class="spec-chip">111 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E00000;">Naked · Ducati</div>
+        <div class="bike-name">Monster SP</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E00000;">111</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E00000;">240</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">The bike that started the naked revolution. Decades on, the Monster is lighter, faster and more technically brilliant than ever before.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── YAMAHA ── -->
+<section class="brand-section brand-yamaha" data-brand="yamaha" id="yamaha">
+  <div class="brand-bg" data-parallax="0.25"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">09 / 10</span>
+      <span class="brand-name">YAMAHA</span>
+    </div>
+    <p class="brand-tagline">Revs Your Heart — Japanese precision with a European soul and racing victories.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #2060E0; --glow-color: rgba(32,96,224,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #2060E0; --glow-color: rgba(32,96,224,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">R1M</div>
+        <div class="type-badge">Superbike</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="yamgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2060E0"/><stop offset="100%" stop-color="#050020"/></linearGradient></defs>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#2060E0" stroke-width="2" stroke-dasharray="11 8"/>
+          <circle cx="128" cy="160" r="19" fill="#111" stroke="#2060E0" stroke-width="1.5"/>
+          <circle cx="128" cy="160" r="5" fill="#2060E0"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#2060E0" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="372" cy="160" r="18" fill="#111" stroke="#2060E0" stroke-width="1.5"/>
+          <circle cx="372" cy="160" r="5" fill="#2060E0"/>
+          <path d="M 176 154 L 198 101 L 260 71 L 338 81 L 382 118 L 382 154 Z" fill="url(#yamgr)" stroke="#2060E0" stroke-width="1"/>
+          <!-- Yamaha twin LED eyes -->
+          <ellipse cx="372" cy="104" rx="14" ry="8" fill="#111" stroke="#2060E0" stroke-width="1"/>
+          <ellipse cx="366" cy="102" rx="5" ry="3" fill="rgba(32,96,224,0.9)"/>
+          <ellipse cx="378" cy="107" rx="5" ry="3" fill="rgba(32,96,224,0.7)"/>
+          <path d="M 260 71 L 314 61 L 350 75 L 338 81 Z" fill="#111"/>
+          <path d="M 311 64 L 348 71 L 338 79 L 308 72 Z" fill="rgba(32,96,224,0.3)"/>
+          <!-- Carbon fiber pattern hint -->
+          <path d="M 198 101 L 260 71 L 338 81 L 382 118" fill="none" stroke="rgba(32,96,224,0.2)" stroke-width="8"/>
+          <line x1="176" y1="154" x2="128" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="344" y1="97" x2="370" y2="160" stroke="#333" stroke-width="7"/>
+          <path d="M 176 143 L 140 146 L 130" fill="none" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(32,96,224,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(32,96,224,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">998cc INLINE-4</span><span class="spec-chip">200 BHP</span><span class="spec-chip">CARBON FIBRE</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#2060E0;">Superbike · Yamaha</div>
+        <div class="bike-name">YZF-R1M</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#2060E0;">200</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#2060E0;">299</span><span class="bike-stat-key">KM/H</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#2060E0;">202</span><span class="bike-stat-key">KG</span></div>
+        </div>
+        <p class="bike-desc">MotoGP technology distilled. Carbon fibre bodywork, Öhlins semi-active suspension, and a crossplane crank engine that sounds like no other.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #2060E0; --glow-color: rgba(32,96,224,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">MT09</div>
+        <div class="type-badge">Hyper Naked</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="125" cy="160" r="46" fill="none" stroke="#2060E0" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="125" cy="160" r="18" fill="#111" stroke="#2060E0" stroke-width="1"/>
+          <circle cx="125" cy="160" r="5" fill="#2060E0"/>
+          <circle cx="368" cy="160" r="43" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="368" cy="160" r="43" fill="none" stroke="#2060E0" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="368" cy="160" r="17" fill="#111" stroke="#2060E0" stroke-width="1"/>
+          <circle cx="368" cy="160" r="4" fill="#2060E0"/>
+          <path d="M 173 152 L 183 108 L 240 88 L 292 88 L 330 106 L 356 142 L 356 152 Z" fill="#003388" stroke="#2060E0" stroke-width="1"/>
+          <path d="M 208 88 L 292 84 L 308 106 L 203 110 Z" fill="#0044AA"/>
+          <!-- MT aggressive headlight insect eye -->
+          <polygon points="338,92 365,100 364,120 336,112" fill="#111" stroke="#2060E0" stroke-width="1"/>
+          <polygon points="340,95 362,102 361,115 338,108" fill="rgba(32,96,224,0.7)"/>
+          <rect x="258" y="74" width="44" height="6" rx="3" fill="#333" stroke="#2060E0" stroke-width="0.5"/>
+          <rect x="200" y="115" width="88" height="35" rx="4" fill="#111" stroke="#2060E0" stroke-width="0.5"/>
+          <line x1="173" y1="152" x2="125" y2="160" stroke="#333" stroke-width="6"/>
+          <line x1="330" y1="106" x2="366" y2="160" stroke="#333" stroke-width="6"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(32,96,224,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(32,96,224,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">890cc TRIPLE</span><span class="spec-chip">119 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#2060E0;">Hyper Naked · Yamaha</div>
+        <div class="bike-name">MT-09 SP</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#2060E0;">119</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#2060E0;">226</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">Dark Side of Japan. The crossplane 3-cylinder is an elemental force — torquey, playful, and addictively fun in any urban environment.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── HONDA ── -->
+<section class="brand-section brand-honda" data-brand="honda" id="honda">
+  <div class="brand-bg" data-parallax="0.25"></div>
+  <div class="brand-header reveal">
+    <div class="brand-name-wrap">
+      <span class="brand-number">10 / 10</span>
+      <span class="brand-name">HONDA</span>
+    </div>
+    <p class="brand-tagline">The Power of Dreams — Engineering supremacy proven on every track in the world.</p>
+  </div>
+  <div class="bikes-grid" style="--accent-color: #E81020; --glow-color: rgba(232,16,32,0.5);">
+
+    <div class="bike-card reveal" style="--accent-color: #E81020; --glow-color: rgba(232,16,32,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">CBR1000</div>
+        <div class="type-badge">Fireblade</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="hndgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E81020"/><stop offset="100%" stop-color="#6a0008"/></linearGradient></defs>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="128" cy="160" r="47" fill="none" stroke="#E81020" stroke-width="2" stroke-dasharray="11 8"/>
+          <circle cx="128" cy="160" r="19" fill="#111" stroke="#E81020" stroke-width="1.5"/>
+          <circle cx="128" cy="160" r="5" fill="#E81020"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#1a1a1a" stroke-width="13"/>
+          <circle cx="372" cy="160" r="44" fill="none" stroke="#E81020" stroke-width="2" stroke-dasharray="10 7"/>
+          <circle cx="372" cy="160" r="18" fill="#111" stroke="#E81020" stroke-width="1.5"/>
+          <circle cx="372" cy="160" r="5" fill="#E81020"/>
+          <path d="M 176 154 L 198 101 L 260 71 L 338 81 L 382 118 L 382 154 Z" fill="url(#hndgr)" stroke="#E81020" stroke-width="1"/>
+          <path d="M 260 71 L 315 61 L 350 75 L 338 81 Z" fill="#111"/>
+          <path d="M 312 64 L 348 71 L 338 79 L 308 72 Z" fill="rgba(232,16,32,0.3)"/>
+          <!-- Honda twin ram air intakes -->
+          <ellipse cx="372" cy="106" rx="12" ry="8" fill="#111" stroke="#E81020" stroke-width="1"/>
+          <ellipse cx="366" cy="103" rx="5" ry="3" fill="rgba(232,16,32,0.9)"/>
+          <ellipse cx="378" cy="110" rx="5" ry="3" fill="rgba(232,16,32,0.7)"/>
+          <line x1="176" y1="154" x2="128" y2="160" stroke="#333" stroke-width="7"/>
+          <line x1="344" y1="97" x2="370" y2="160" stroke="#333" stroke-width="7"/>
+          <path d="M 176 143 L 140 146 L 130 158" fill="none" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+          <!-- Wing detail -->
+          <path d="M 200 100 L 174 86 L 177 100 Z" fill="#E81020" opacity="0.5"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(232,16,32,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(232,16,32,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1000cc INLINE-4</span><span class="spec-chip">217 BHP</span><span class="spec-chip">FIREBLADE</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E81020;">Superbike · Honda</div>
+        <div class="bike-name">CBR1000RR-R Fireblade SP</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E81020;">217</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E81020;">299</span><span class="bike-stat-key">KM/H</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E81020;">201</span><span class="bike-stat-key">KG</span></div>
+        </div>
+        <p class="bike-desc">Three decades of Fireblade perfection culminating in MotoGP-derived mass centralization, aero winglets, and a stratospheric power-to-weight ratio.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="bike-card reveal reveal-delay-1" style="--accent-color: #E81020; --glow-color: rgba(232,16,32,0.5);">
+      <div class="bike-visual">
+        <div class="bike-watermark">AFRICATWIN</div>
+        <div class="type-badge">Adventure</div>
+        <svg class="bike-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="118" cy="162" r="50" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="118" cy="162" r="50" fill="none" stroke="#E81020" stroke-width="1.5" stroke-dasharray="10 8"/>
+          <circle cx="118" cy="162" r="20" fill="#111" stroke="#E81020" stroke-width="1"/>
+          <circle cx="118" cy="162" r="6" fill="#E81020"/>
+          <circle cx="382" cy="162" r="46" fill="none" stroke="#1a1a1a" stroke-width="12"/>
+          <circle cx="382" cy="162" r="46" fill="none" stroke="#E81020" stroke-width="1.5" stroke-dasharray="9 7"/>
+          <circle cx="382" cy="162" r="18" fill="#111" stroke="#E81020" stroke-width="1"/>
+          <circle cx="382" cy="162" r="5" fill="#E81020"/>
+          <path d="M 170 158 L 178 92 L 234 75 L 298 75 L 340 98 L 366 148 L 366 158 Z" fill="#660008" stroke="#E81020" stroke-width="1"/>
+          <path d="M 205 75 L 298 71 L 314 98 L 200 102 Z" fill="#880010"/>
+          <circle cx="365" cy="108" r="25" fill="#111" stroke="#E81020" stroke-width="1.5"/>
+          <circle cx="365" cy="108" r="14" fill="rgba(232,16,32,0.5)"/>
+          <circle cx="365" cy="108" r="6" fill="rgba(232,16,32,0.9)"/>
+          <rect x="242" y="60" width="70" height="7" rx="3" fill="#333" stroke="#E81020" stroke-width="0.5"/>
+          <rect x="200" y="115" width="78" height="40" rx="5" fill="#111" stroke="#E81020" stroke-width="0.5"/>
+          <!-- High exhaust -->
+          <path d="M 170 145 L 148 126 L 132 122 L 120 132 L 120 162" fill="none" stroke="#888" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="170" y1="158" x2="118" y2="162" stroke="#333" stroke-width="7"/>
+          <line x1="340" y1="98" x2="380" y2="162" stroke="#333" stroke-width="7"/>
+        </svg>
+        <div class="bike-glow" style="background:rgba(232,16,32,0.5);"></div>
+        <div class="bike-ground" style="background: linear-gradient(90deg,transparent,rgba(232,16,32,0.3) 50%,transparent);"></div>
+        <div class="bike-overlay"></div>
+        <div class="bike-specs-hover"><div class="specs-chips"><span class="spec-chip">1084cc PARALLEL-TWIN</span><span class="spec-chip">102 BHP</span></div></div>
+      </div>
+      <div class="bike-info">
+        <div class="bike-category" style="color:#E81020;">Adventure · Honda</div>
+        <div class="bike-name">Africa Twin Adventure Sports</div>
+        <div class="bike-stats">
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E81020;">102</span><span class="bike-stat-key">BHP</span></div>
+          <div class="bike-stat"><span class="bike-stat-val" style="color:#E81020;">220</span><span class="bike-stat-key">KM/H</span></div>
+        </div>
+        <p class="bike-desc">Adventure without limits. The Africa Twin DCT devours continents, deserts and mountain passes with equal composure and confidence.</p>
+        <div class="bike-cta"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 8h12M9 4l5 4-5 4"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── COMPARISON TABLE ── -->
+<section class="comparison-section">
+  <div class="section-header reveal">
+    <div class="section-eyebrow">Side by Side</div>
+    <h2 class="section-title">POWER<br><span>RANKINGS</span></h2>
+  </div>
+  <div class="reveal reveal-delay-1">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Motorcycle</th>
+          <th>Brand</th>
+          <th>Type</th>
+          <th>Power Output</th>
+          <th>Top Speed</th>
+          <th>Engine</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ninja H2R</td>
+          <td>Kawasaki</td>
+          <td>Hypersport</td>
+          <td><div class="power-bar"><span class="power-val">300 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:100%"></div></div></div></td>
+          <td>400+ KM/H</td>
+          <td>998cc Supercharged</td>
+        </tr>
+        <tr>
+          <td>Panigale V4R</td>
+          <td>Ducati</td>
+          <td>Superbike</td>
+          <td><div class="power-bar"><span class="power-val">240 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:80%"></div></div></div></td>
+          <td>299 KM/H</td>
+          <td>998cc Desmo V4</td>
+        </tr>
+        <tr>
+          <td>RSV4 Factory</td>
+          <td>Aprilia</td>
+          <td>Superbike</td>
+          <td><div class="power-bar"><span class="power-val">217 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:72%"></div></div></div></td>
+          <td>299 KM/H</td>
+          <td>1099cc V4</td>
+        </tr>
+        <tr>
+          <td>CBR1000RR-R SP</td>
+          <td>Honda</td>
+          <td>Superbike</td>
+          <td><div class="power-bar"><span class="power-val">217 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:72%"></div></div></div></td>
+          <td>299 KM/H</td>
+          <td>1000cc Inline-4</td>
+        </tr>
+        <tr>
+          <td>M1000RR</td>
+          <td>BMW</td>
+          <td>M Superbike</td>
+          <td><div class="power-bar"><span class="power-val">215 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:71%"></div></div></div></td>
+          <td>306 KM/H</td>
+          <td>999cc Inline-4</td>
+        </tr>
+        <tr>
+          <td>S1000RR</td>
+          <td>BMW</td>
+          <td>Superbike</td>
+          <td><div class="power-bar"><span class="power-val">210 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:70%"></div></div></div></td>
+          <td>306 KM/H</td>
+          <td>999cc Inline-4</td>
+        </tr>
+        <tr>
+          <td>GSX-R1000R</td>
+          <td>Suzuki</td>
+          <td>Superbike</td>
+          <td><div class="power-bar"><span class="power-val">202 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:67%"></div></div></div></td>
+          <td>299 KM/H</td>
+          <td>999cc Inline-4</td>
+        </tr>
+        <tr>
+          <td>YZF-R1M</td>
+          <td>Yamaha</td>
+          <td>Superbike</td>
+          <td><div class="power-bar"><span class="power-val">200 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:66%"></div></div></div></td>
+          <td>299 KM/H</td>
+          <td>998cc Crossplane</td>
+        </tr>
+        <tr>
+          <td>GSX1300R Hayabusa</td>
+          <td>Suzuki</td>
+          <td>Hypersport</td>
+          <td><div class="power-bar"><span class="power-val">190 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:63%"></div></div></div></td>
+          <td>299 KM/H</td>
+          <td>1340cc Inline-4</td>
+        </tr>
+        <tr>
+          <td>Super Duke 1290R</td>
+          <td>KTM</td>
+          <td>Super Naked</td>
+          <td><div class="power-bar"><span class="power-val">180 BHP</span><div class="power-bar-track"><div class="power-bar-fill" style="--width:60%"></div></div></div></td>
+          <td>189 KM/H</td>
+          <td>1301cc V-Twin</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-giant">MOTO</div>
+  <div class="footer-content">
+    <div>
+      <div class="footer-brand">MOTO<span>.</span>UNIVERSE</div>
+      <p class="footer-tagline">The ultimate showcase for motorcycle enthusiasts worldwide.</p>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#kawasaki">Kawasaki</a></li>
+      <li><a href="#bmw">BMW</a></li>
+      <li><a href="#ktm">KTM</a></li>
+      <li><a href="#suzuki">Suzuki</a></li>
+      <li><a href="#aprilia">Aprilia</a></li>
+      <li><a href="#re">Royal Enfield</a></li>
+    </ul>
+    <ul class="footer-links">
+      <li><a href="#harley">Harley-Davidson</a></li>
+      <li><a href="#ducati">Ducati</a></li>
+      <li><a href="#yamaha">Yamaha</a></li>
+      <li><a href="#honda">Honda</a></li>
+    </ul>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 MOTO UNIVERSE · All trademarks belong to respective brands · For showcase purposes only</span>
+    <span class="footer-copy">Crafted with pure passion for motorcycles</span>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+// ── LOADER ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('done');
+  }, 2000);
+});
+
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+});
+
+function animateRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a, button, .bike-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width = '20px'; cursor.style.height = '20px';
+    ring.style.width = '60px'; ring.style.height = '60px';
+    ring.style.borderColor = 'rgba(255,69,0,1)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width = '12px'; cursor.style.height = '12px';
+    ring.style.width = '38px'; ring.style.height = '38px';
+    ring.style.borderColor = 'rgba(255,69,0,0.6)';
+  });
+});
+
+// ── SCROLL PROGRESS ──
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  progress.style.width = pct + '%';
+});
+
+// ── NAV SCROLL ──
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 80);
+}, { passive: true });
+
+// ── PARALLAX ──
+const heroBg = document.getElementById('heroBg');
+const heroGrid = document.getElementById('heroGrid');
+const heroTitle = document.getElementById('heroTitle');
+
+window.addEventListener('scroll', () => {
+  const sy = window.scrollY;
+  const vh = window.innerHeight;
+
+  // Hero parallax layers
+  if (sy < vh * 1.5) {
+    heroBg.style.transform = `translateY(${sy * 0.4}px)`;
+    heroGrid.style.transform = `perspective(600px) rotateX(30deg) scale(2.2) translateY(${20 + sy * 0.04}%)`;
+    heroTitle.style.transform = `translateY(${sy * 0.2}px)`;
+  }
+
+  // Brand section parallax backgrounds
+  document.querySelectorAll('.brand-bg[data-parallax]').forEach(el => {
+    const section = el.closest('.brand-section');
+    const rect = section.getBoundingClientRect();
+    const rate = parseFloat(el.dataset.parallax);
+    const offset = (rect.top + rect.height / 2 - vh / 2) * rate;
+    el.style.transform = `translateY(${offset}px)`;
+  });
+
+  // Brand name text parallax
+  document.querySelectorAll('.brand-name[data-parallax-text]').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const rate = parseFloat(el.dataset.parallaxText);
+    const offset = (rect.top - vh / 2) * rate;
+    el.style.transform = `translateX(${offset}px)`;
+  });
+
+}, { passive: true });
+
+// ── REVEAL ON SCROLL ──
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12 });
+reveals.forEach(r => observer.observe(r));
+
+// ── POWER BAR ANIMATION ──
+const barObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.power-bar-fill').forEach(fill => {
+        const w = fill.style.getPropertyValue('--width') || '50%';
+        fill.style.transformOrigin = 'left';
+        fill.classList.add('animate');
+        fill.style.transform = `scaleX(${parseFloat(w)/100})`;
+      });
+    }
+  });
+}, { threshold: 0.2 });
+document.querySelectorAll('.comp-table').forEach(t => barObserver.observe(t));
+
+// ── COUNTER ANIMATION ──
+function animateCounter(el, target, duration = 1800) {
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.floor(ease * target);
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  };
+  requestAnimationFrame(step);
+}
+
+const statNums = document.querySelectorAll('.hero-stat-num[data-count]');
+let countersStarted = false;
+window.addEventListener('scroll', () => {
+  if (!countersStarted) {
+    statNums.forEach(el => animateCounter(el, parseInt(el.dataset.count)));
+    countersStarted = true;
+  }
+}, { once: true, passive: true });
+// Also start on page load after a delay
+setTimeout(() => {
+  if (!countersStarted) {
+    statNums.forEach(el => animateCounter(el, parseInt(el.dataset.count)));
+    countersStarted = true;
+  }
+}, 2200);
+
+// ── PARTICLES ──
+const particlesContainer = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.cssText = `
+    left: ${Math.random() * 100}%;
+    animation-delay: ${Math.random() * 8}s;
+    animation-duration: ${6 + Math.random() * 8}s;
+    --drift: ${(Math.random() - 0.5) * 100}px;
+    width: ${1 + Math.random() * 2}px;
+    height: ${1 + Math.random() * 2}px;
+    background: ${Math.random() > 0.5 ? '#FF4500' : '#FFB800'};
+  `;
+  particlesContainer.appendChild(p);
+}
+
+// ── FILTER ──
+const filterBtns = document.querySelectorAll('.filter-btn');
+const brandSections = document.querySelectorAll('.brand-section');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+
+    brandSections.forEach(section => {
+      if (filter === 'all' || section.dataset.brand === filter) {
+        section.classList.remove('filtered');
+        section.style.animation = 'fadeUp 0.5s ease both';
+      } else {
+        section.classList.add('filtered');
+      }
+    });
+
+    // Also hide quote strip if filtering
+    const quoteStrip = document.querySelector('.quote-strip');
+    const compSection = document.querySelector('.comparison-section');
+    if (filter !== 'all') {
+      if(quoteStrip) quoteStrip.style.display = 'none';
+      if(compSection) compSection.style.display = 'none';
+    } else {
+      if(quoteStrip) quoteStrip.style.display = '';
+      if(compSection) compSection.style.display = '';
+    }
+  });
+});
+
+// ── TILT EFFECT ON CARDS ──
+document.querySelectorAll('.bike-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -8;
+    card.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${y}deg) translateZ(10px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotateY(0) rotateX(0) translateZ(0)';
+    card.style.transition = 'transform 0.5s ease';
+  });
+  card.addEventListener('mouseenter', () => {
+    card.style.transition = 'transform 0.1s ease';
+  });
+});
+
+// ── SMOOTH SCROLL FOR NAV ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+</body>
+</html>
